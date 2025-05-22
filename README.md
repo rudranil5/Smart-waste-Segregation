@@ -1,6 +1,6 @@
 # Smart-waste-Segregation
 <HTML >
-<STYLE = "background:#EEEDEA;">
+
   <hr>
   <H1>A System to recognize and separate waste types</H1>
   <br>
@@ -12,5 +12,5 @@
   <hr>
   <hr>
   all necessary files and components are not uploaded due to confidentiality and Ongoing Upgradation
-</STYLE>
+
 </HTML>
