@@ -9,7 +9,7 @@
   Developed in cooperation with :- <br> <a href=https://github.com/Exploretech-ankita> Ankita Pramanik</a>  ,<br> Aniket Maity ,<br> Debajyoti Roy ,<br> <a           href=https://github.com/psroy007>Purab Singha Roy </a> , <br> Prof. Arnab Chakraborty.
   <br>
   
-  Special Thanks to - Dr. Tanushree Chatarjee & Dr Sanjib Roy
+  Dr. Tanushree Chatarjee & <BR>Dr Sanjib Roy
 
   <hr>
   <hr>
