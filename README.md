@@ -15,5 +15,6 @@
   <hr>
   all necessary files and components are not uploaded due to confidentiality and Ongoing Upgradation
   <BR>
-----------<A HREF="HTTPS://GITHUB.COM/RUDRANIL5">RUDRANIL KHANRA /</A>
+  <BR>
+----------<A HREF="HTTPS://GITHUB.COM/RUDRANIL5">RUDRANIL KHANRA</A>~TEAM LEAD
 </HTML>
