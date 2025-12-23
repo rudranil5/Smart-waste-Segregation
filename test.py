@@ -9,6 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import pandas as pd
+#import server2208 as server2
 
 #print(numpy.__file__)
 
@@ -23,9 +24,9 @@ CLASS_MAPPING = {
 }
 
 # Specify paths here
-MODEL_PATH = r'D:\DATASET_Trash_sbh_readwrite_ard\garbage-detector\models\final_model_new.keras'  # Path to your trained model
-IMAGE_PATH = r'D:\DATASET_Trash_sbh_readwrite_ard\garbage-detector\received_image.jpg'  # Path to the image for prediction
-DATA_DIR = r'D:\DATASET_Trash_sbh\garbage-detector\data\dataset'  # Path to the dataset for evaluation
+MODEL_PATH = r'E:\DATASET_Trash_sbh_readwrite_ard\garbage-detector\models\final_model_new.keras'  # Path to your trained model
+IMAGE_PATH = r'C:\Users\rudra\OneDrive\Documents\Downloads\Paper001Name.jpg-20250703T164648Z-1-001.zip\Paper001Name.jpg'  # Path to the image for prediction
+DATA_DIR = r'E:\DATASET_Trash_sbh\garbage-detector\data\dataset'  # Path to the dataset for evaluation
 BATCH_SIZE = 16
 IMAGE_SIZE = 224  # Updated image size to match the model input
 
@@ -188,7 +189,7 @@ def evaluate_model(model_path, data_dir, batch_size, image_size):
 if __name__ == '__main__':
 
     #server recieves
-    server_side()
+    server2.server()
     # Predict a single image
    # predict_single_image(MODEL_PATH, IMAGE_PATH, (IMAGE_SIZE, IMAGE_SIZE))
 
