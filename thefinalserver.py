@@ -1,37 +1,61 @@
-import socket
-import time
+def server():
+    
+    import pbagtest171
+    import socket
+    import os
+    
+    # Define the target directory
+    #target_directory =open("Z://codesWS","w") # Replace with your desired path
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('192.168.55.43', 12346))
-server_socket.listen(1)
-print("Server listening...")
+    # Ensure the directory exists
+    #os.makedirs(target_directory, exist_ok=True)
 
-conn, addr = server_socket.accept()
-print(f"Connected by {addr}")
+    # Define the full path for the received file
+    file_path = 'received_image.jpg'
 
-with open("E:\DATASET_Trash_sbh_readwrite_ard\RecievedImage.png", "wb") as f:
-    while True:
-        data = conn.recv(300000)
-        if not data:
-            break
-        f.write(data)
+    # Set up the server socket
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('192.168.0.191', 12346))
+    server_socket.listen(1)
+    print("Server listening...")
+
+    # Accept a connection
+    conn, addr = server_socket.accept()
+    print(f"Connected by {addr}")
+
+    feedback=""
+    # Receive and save the image
+    with open(file_path, "wb") as f:
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            f.write(data)
+
+    print(f"Image received and saved to {file_path}")
+
+    # Send a confirmation message
+    msg = "Got it"
+    feedback+=msg
+    feedback+=" "
+    #conn.send(msg.encode())
+    feedback+=(pbagtest171.testbag("received_image.jpg"))
+    #msg = "\nServer here......\n--got the image..."
+    #conn.send(msg.encode())
+    #while True:
+    print(feedback)
+    conn.send(feedback.encode())
         
-        print("Image received and saved.")
+    i=0
+    # Close the connection
+    try:
+        i+=1
+        print(i)
+        server()
+        
+    except Exception as e:
+        conn.close()
+        print("End1",e)
 
-        #print("Image received and saved.")
-        IMAGE_PATH = "received_image.jpg"
-        print("Image path is : ",IMAGE_PATH)
-        #proccess the image now
-       # the_prediction=predict_single_image(MODEL_PATH, IMAGE_PATH, (IMAGE_SIZE, IMAGE_SIZE))
-
-        # Evaluate model with dataset
-       # evaluate_model(MODEL_PATH, DATA_DIR, BATCH_SIZE, (IMAGE_SIZE, IMAGE_SIZE))
-        #conn.sendall(the_prediction)
-        t=("happy happy")
-        pp="got it"
-       
-
-        # Convert to string and send
-        message = f"{t}|{pp}"
-        conn.sendall(message.encode())
-        time.sleep(30)
+if __name__=="__main__":
+    server()
