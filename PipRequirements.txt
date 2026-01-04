@@ -1,0 +1,10 @@
+tensorflow
+numpy
+opencv-python
+scikit-learn
+seaborn
+matplotlib
+pandas
+mysql-connector-python
+tensorflow
+numpy

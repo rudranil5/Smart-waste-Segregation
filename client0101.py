@@ -8,11 +8,15 @@ import socket
 import cv2
 import os
 import struct
+import add_rows_mysql as record
 
 def writeLog(e):
-    print("Error occured - ",e)
+    #print("Error occured - ",e)
+    Log=str(e)
+    record.writeLogBinClient(Log)
+    
 
-class connection:
+class ClientConnection:
     
     def connection(self,host="127.0.0.1",port=12345):
         print("seeking Server... ")
@@ -22,6 +26,9 @@ class connection:
         self.client=client
         return self.client
     
+    def closeConnection(self):
+        self.client.close()
+        
     def sendImg(self,imgPath):
         try:
             with open(imgPath,"rb") as f:
@@ -32,20 +39,27 @@ class connection:
             print("image sent-")
         except Exception as e:
             writeLog(e)
-        return
+            return 0
+        return 1
     def sendSize(self,size):
         try:
             self.client.sendall(struct.pack("!Q",size))
             print("size sent")
+        except ConnectionAbortedError :
+            writeLog("Connection Aborted")
+            return 0
         except Exception as e:
             writeLog(e)
+            return 0
         
+        return 1
     def sendData(self,data):
         try:
             self.client.sendall(data)
         except Exception as e:
             writeLog(e)
-        return
+            return 0
+        return 1
     def recieve(self):
         feedback=None
         try:
@@ -81,48 +95,79 @@ def clientSide(full_path,client_socket):
     print(data)
     client_socket.close()
 
-#  Open camera & shoot Photo 
-def imgCapture():
+class Camera:
+    def __init__(self): #Open Camera
+        cam = cv2.VideoCapture(0)
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
 
-    print("Object detected\t\tCapturing Image...")
-    cam = cv2.VideoCapture(0)
-    cam.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
-    cam.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
+        if not cam.isOpened():
+            print("Error: Could not open camera.")
+            writeLog("ERROR!!!\n---\nFailed to open Camera\n---\n")
+            exit()
+        self.cam=cam
+        #print("Camera Turned on")
+        writeLog("Camera turned on")
+    
+    #  Shoot Photo 
+    def imgCapture(self):
 
-    if not cam.isOpened():
-        print("Error: Could not open camera.")
-        exit()
+        print("Object detected\t\tCapturing Image...")
+        # --- Save path ---
+        Dir = r"C:\Desktop"
+        filename = "captured_image.jpg"
+        full_path = os.path.join(Dir, filename)
+        os.makedirs(Dir, exist_ok=True)
+        ret, frame = self.cam.read()
+        if ret:
+            resized_frame = cv2.resize(frame, (512, 512))
+            cv2.imwrite(full_path, resized_frame)
+            print(f"Saved photo at: {full_path}")  
 
-    # --- Save path ---
-    Dir = r"C:\Desktop"
-    filename = "captured_image.jpg"
-    full_path = os.path.join(Dir, filename)
-    os.makedirs(Dir, exist_ok=True)
-    ret, frame = cam.read()
-    if ret:
-        resized_frame = cv2.resize(frame, (512, 512))
-        cv2.imwrite(full_path, resized_frame)
-        print(f"Saved photo at: {full_path}")  
-
-    cam.release()
-    cv2.destroyAllWindows()
-    return full_path
-
-if __name__=="__main__":
-    Connection=connection()
+        self.cam.release()
+        cv2.destroyAllWindows()
+        return full_path
+    
+def theControl():
+    Connection=ClientConnection()
     Connection.connection()
-    while connection:
-        path=imgCapture()
-        Connection.sendSize(os.path.getsize(path))
+    camera=Camera()
+    while Connection:
+        path=camera.imgCapture()
+        status=Connection.sendSize(os.path.getsize(path))
         Connection.sendImg(path)
+        #get values from arduino, pack in a string= values
+        #size of string len(values)=size 
+        #Connection.sendSize(size)
+        #Connection.sendData(values)
         Descision=Connection.recieve()
         if Descision==1:
-            print (f"Recyclable{Descision}")
-        else :
-            print(f"Non-Recyclable{Descision}")
+            print ("Recyclable")
+        elif Descision==2 :
+            print("Non-Recyclable")
+        else:
+            print("Cant get Descicion from server ")
+            Descision=2
+            writeLog("WARNING!!!\nError Getting Descision from server\n!!!")
         print("Send to chamber : ",Descision,sep=" --------- ",end="\n\n")
+        if status==0:
+            try:
+                Connection.closeConnection()
+                print("Disconnected")
+                theControl()
+            except Exception as e:
+                print(e)
+                continue
+            
         key = cv2.waitKey(1)
         if key % 256 == 27:  # ESC key
             print("Escape hit, closing...")
-            connection.close()
-    connection.close()
+            Connection.closeConnection()
+    Connection.closeConnection()
+    print("Disconnected")
+
+    
+if __name__=="__main__":
+    record.connectDb()
+    theControl()
+    

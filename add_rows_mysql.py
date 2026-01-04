@@ -13,7 +13,6 @@ and only works for in and char and varchar datatypes with noi specifications in 
 
 import mysql.connector as sql
 connection=None
-
 def initializeBinServer():  #creates the required databases and tables for logs
     host=input("Enter Mysql Server Hostname: ")
     user=input("Enter Mysql Server Username: ")
@@ -40,7 +39,8 @@ def initializeBinServer():  #creates the required databases and tables for logs
         if not mkthelog:
             cursor.execute("create database thelogs2")
             cursor.execute("use thelogs2")
-            cursor.execute("create table waste_bin_server (serial int,time Timestamp default current_timestamp,logs varchar(100))")
+            cursor.execute("create table waste_bin_server (serial int,time Timestamp default current_timestamp,log varchar(500))")
+            cursor.execute("create table waste_bin_client (serial int,time Timestamp default current_timestamp,log varchar(500))")
     else:
         print("Connection Error !! retry with correct details: ")
     
@@ -51,10 +51,9 @@ def connectDb(): #establish connection to mysql database server
         #print(connection)      
         print("connected to database on localhost  ")
 
-    cursor=connection.cursor()
 
 def  closeDb():   #close the connection to database server
-    print("Closed Connection to Database Server ---")
+    print("\nClosed Connection to Database Server ---")
     connection.close()
        
 def showTable(): # show tables from the projects database
@@ -139,23 +138,20 @@ def insertRow(filepath,category="skipped",confidence="skipped"):   #add values t
         print(e)
         print(f"File path {filepath} already there !!! ")
         return ("duplicate")
-    if category=="skipped":
-        return ("duplicate")
+    
     
 def writeLogBinServer(log): # log for the smart bin
     
     cursor=connection.cursor()
-    
-    cursor.execute("use TheLogs")
-    cursor.execute("select max(serial) from waste_bin_server")
-    k=cursor.fetchall()
-    
-    for i in k :
-        serial=int(i[0]+1)
-        #print(serial)
-
     try:
+        cursor.execute("use TheLogs")
+        cursor.execute("select max(serial) from waste_bin_server")
+        k=cursor.fetchall()
         
+        for i in k :
+            serial=int(i[0]+1)
+            #print(serial)
+      
         query=("Insert into waste_bin_server (serial,log)values (%s,%s)")
         datas=(serial,log)
         cursor.execute(query,datas)
@@ -165,7 +161,41 @@ def writeLogBinServer(log): # log for the smart bin
         print("\n___\t___\t___\n\n")
         print(e)
         print("\n\n___\t___\t___\n\n")
-        closeDb()
+        print("The data to log is - ",log)
+        query=("Insert into waste_bin_server (serial,log)values (%s,%s)")
+        cursor.execute(query,str(e))      
+        #closeDb()
+        return
+    
+
+def writeLogBinClient(log): # log for the smart bin
+    
+    cursor=connection.cursor()
+    try:
+        cursor.execute("use TheLogs")
+        cursor.execute("select max(serial) from waste_bin_client")
+        k=cursor.fetchall()
+        
+        for i in k :
+            if i[0] is None:
+                serial=1
+                break
+            serial=int(i[0]+1)
+            #print(serial)
+      
+        query=("Insert into waste_bin_client (serial,log)values (%s,%s)")
+        datas=(serial,log)
+        cursor.execute(query,datas)
+        connection.commit()
+        return
+    except Exception as e:
+        print("\n___\t___\t___\n\n")
+        print(e)
+        print("\n\n___\t___\t___\n\n")
+        print("The data to log is - ",log)
+        query=("Insert into waste_bin_client (serial,log)values (%s,%s)")
+        cursor.execute(query,str(e))      
+        #closeDb()
         return
  
     
