@@ -26,8 +26,10 @@
 
 ---
   <hr>
-  all necessary files and components are not uploaded due to confidentiality and Ongoing Upgradation
+  all necessary files and components are not uploaded due to confidentiality of the research and Ongoing Upgradation
   <BR>
   <BR>
 ----------   <A HREF="HTTPS://GITHUB.COM/RUDRANIL5">RUDRANIL KHANRA</A>   ~TEAM LEAD
 </HTML>
+
+This project is very easy to contribute, each modules can be tested independently, just with their models if required. To contribute pls install mysql, pyhton and all python modules stated in pip requirements.txt. then run the add_rows_mysql module once to setup the dependency databases and tables. then you can easily test and update the codes.
