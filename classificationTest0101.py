@@ -45,7 +45,7 @@ def preprocess_image(img_path, image_size):
 
 def predict_single_image(model, img_path, image_size):
     """Predict class of a single image, #display it, and #send result to Arduino."""
-    #model = load_model(model_path)   #>>>trying to load it into server
+    if not os.path.isfile(img_path) : raise ValueError("No Image found \t- Classification Test failed") 
     img_tensor, original_img = preprocess_image(img_path, image_size)
     prediction = model.predict(img_tensor)[0][0]
     label = int(prediction > 0.5)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     a=loadModel(r"E:\DATASET_Trash_sbh_readwrite_ard\garbage-detector\models\final_model_new.keras")
     # Predict a single image
     record.connectDb()
-    details=predict_single_image(a, IMAGE_PATH, (IMAGE_SIZE, IMAGE_SIZE))
+    details=predict_single_image(a,IMAGE_PATH, (IMAGE_SIZE, IMAGE_SIZE))
     record.insertRow(IMAGE_PATH,details[0],round(float(details[1]),1))
     # Evaluate model with dataset
     #evaluate_model(MODEL_PATH, DATA_DIR, BATCH_SIZE, (IMAGE_SIZE, IMAGE_SIZE))

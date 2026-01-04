@@ -49,16 +49,15 @@ def theControl():
         filename=f"image{count}.jpg"   
         file_path=os.path.join(imageDir,filename)
 
-        try:
-            count+=1
+        try: 
             size=communication.recieveSize()
-            print(size) #debug
-            communication.recieveImg(size,file_path)
-            print("img rec")
+            #print(size) #debug
+            imgstate=communication.recieveImg(size,file_path)
+            print(f"img {count} received with size-{size}") if not imgstate is None else print("!!!No image recieved")   ###
             #communication.send(f"File {count} recieved... \n")
             #size=communication.recieveSize()
             #moisture=communication.recieve(size)
-            #handle none image recieved error
+            #handle broke connection error in vscode
             ifMultiple=contour.processImg(file_path)
             if ifMultiple:
                 details=["fromcontour","000"]
@@ -80,20 +79,23 @@ def theControl():
                     details.append(detection)
                     communication.send(detection[-1]+1)
                 else :
+                    #handle no img rec
                     writeLog("Unidentified return from plastic bag detection module")
 
             record.insertRow(file_path,details[0],details[1])
             print(details)
             writeLog(f"image {count} is saved")
+            count+=1
         except KeyboardInterrupt as e:
             communication.closeServer()
+            writeLog("Keyboard Interrupt")
             record.closeDb()
             return 1
             
         except Exception as e:
             writeLog(e)
-            communication.closeServer()
-            record.closeDb()
+            #communication.closeServer()
+            #record.closeDb()
 
 
 class Communication:
@@ -110,7 +112,7 @@ class Communication:
         writeLog(f"Connected by {self.addr}")
 
     def closeServer(self):
-        print("Closing connection")
+        print(f"\nClosing connection with {self.addr}")
         writeLog(f"Connection closed with {self.addr}")
         self.conn.close()
 
@@ -124,7 +126,8 @@ class Communication:
                 size+=data
             return (struct.unpack("!Q",size)[0])
         except Exception as e:
-            writeLog(e)
+            log= ("Connection Broken ",e)
+            writeLog(log)
       
     def recieveImg(self,size,file_path):
         try:
@@ -132,13 +135,14 @@ class Communication:
             while len(img)<size:
                 data=self.conn.recv(size-len(img))
                 if not data:
-                    return None
+                    break
                 img+=data
             with open(file_path,"wb") as f:
                 f.write(img)   
-            return
+            return 1
         except Exception as e:
-            writeLog(e) 
+            log= ("Connection Broken ",e)
+            writeLog(log) 
             return None
 
     def recieve(self,size):    #recieves messege type or length or the details of object
@@ -152,14 +156,15 @@ class Communication:
 
             return messege.decode()
         except Exception as e:
-            writeLog(e) 
+            log= ("Connection Broken ",e)
+            writeLog(log) 
 
     def send(self,messege):
         try:
             self.conn.sendall(struct.pack("!Q",messege))
         except Exception as e:
-            writeLog(e)
-
+            log= ("Connection Broken ",e)
+            writeLog(log)
     def communication1(self,conn): #not needed , to be removed
         
         try:
@@ -189,10 +194,13 @@ class Communication:
 
                 
 def writeLog(e):
-    record.writeLogBinServer(e)
+    Log=str(e)
+    record.writeLogBinServer(Log)
 
 def fatalError(e):
     print("\nAn error occured-----  \n_____\t_____\n\n",e,"\n\n_____\t_____\n")
+    writeLog(e)
+    record.closeDb()
     exit()
 
 if __name__=="__main__":
