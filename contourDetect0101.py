@@ -4,26 +4,27 @@ import os
 import pbagtest0101
 import classificationTest0101
 def multiControll(bagmodel,classificationmodel):
-    count=len(os.listdir(r"C:\Desktop\sbV0101\objects"))
+    count=len(os.listdir("objects"))
     print(count)
     i=1
     listDec=[]
     while i<=count:
-        a=pbagtest0101.testbag(rf"C:\Desktop\sbV0101\objects\object_{i}.jpg",bagmodel)
+        currObject=os.path.join("objects",f"object_{i}.jpg")
+        a=pbagtest0101.testbag(currObject,bagmodel)
         
         if a[-1]==0:
-            b=classificationTest0101.predict_single_image(classificationmodel,rf"objects\object_{i}.jpg",(224,224))
+            b=classificationTest0101.predict_single_image(classificationmodel,currObject,(224,224))
             listDec.append(b[-1]+1)
         elif a[-1]== "Recyclable" :
             listDec.append(1)
         elif a[-1]=="Non-Recyclable":
             listDec.append(2)
         else :
-            os.remove(rf"C:\Desktop\sbV0101\objects\object_{i}.jpg")
+            os.remove(currObj)
             i+=1
             continue
         
-        os.remove(rf"C:\Desktop\sbV0101\objects\object_{i}.jpg")
+        os.remove(currObject)
         i+=1
     print(f"The list of descisions is as below\n\n {listDec}")
     probability=1 if listDec.count(1) > listDec.count(2)  else 2
@@ -139,7 +140,8 @@ def processImg(img_path):
         return 0
     
 if __name__=="__main__":
-    processImg(r"C:\Desktop\sbV0101\received_image.jpg")
+    processImg(r"C:\Desktop\sbV2.2.0\Images\image34.jpg")
     bm=bagmodel=pbagtest0101.loadModel()
     cm=classificationTest0101.loadModel()
-    multiControll(bm,cm)
+    a=multiControll(bm,cm)
+    print(a)

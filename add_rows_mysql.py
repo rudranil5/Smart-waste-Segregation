@@ -17,14 +17,14 @@ def initializeBinServer():  #creates the required databases and tables for logs
     host=input("Enter Mysql Server Hostname: ")
     user=input("Enter Mysql Server Username: ")
     passwd=input(f"Enter Mysql Server Password for {user}: ")
-    connection=sql.connect(host=host,user=user,password=passwd)
+    connection=sql.connect(host=host,user=user,password=passwd,ssl_disabled=False)  #for remote hosting too
     cursor=connection.cursor()
     cursor.execute("show databases")
     if connection:
         a=cursor.fetchall()
         mkproject,mkthelog=0,0
         for i in a:
-            if 'projects2' == i[0]:
+            if 'projects2' == i[0]: #cursor.fetchall() return a list of tuples.
                 mkproject=1
                 break
         for i in a:
@@ -36,7 +36,7 @@ def initializeBinServer():  #creates the required databases and tables for logs
             cursor.execute("create database projects2")
             cursor.execute("use projects2")
             cursor.execute("create table waste_data_test (serial int,filepath varchar(100),category varchar(50),confidence varchar(20))")
-        if not mkthelog:
+        if not mkthelog:    #server,client both databases will be created in same place
             cursor.execute("create database thelogs2")
             cursor.execute("use thelogs2")
             cursor.execute("create table waste_bin_server (serial int,time Timestamp default current_timestamp,log varchar(500))")
@@ -46,7 +46,7 @@ def initializeBinServer():  #creates the required databases and tables for logs
     
 def connectDb(): #establish connection to mysql database server
     global connection
-    connection=sql.connect(host='localhost',user='root',password='root')
+    connection=sql.connect(host='localhost',user='root',password='root',ssl_disabled=False)
     if connection.is_connected():          #to check if connection is done
         #print(connection)      
         print("connected to database on localhost  ")
@@ -109,7 +109,7 @@ def insertRow_unknown(): #add values to any table #table needed to be specified 
 
 def insertRow(filepath,category="skipped",confidence="skipped"):   #add values to smart bin test results     #table and database chosen inside function already
 
-    '''connection=sql.connect(host='localhost',user='root',password='root',database='projects')      #connection to database
+    '''connection=sql.connect(host='localhost',user='root',password='root',database='projects',ssl_required=False)      #connection to database
     if connection.is_connected():          #to check if connection is done
         #print(connection)      
         print('connected to database projects')
@@ -117,7 +117,7 @@ def insertRow(filepath,category="skipped",confidence="skipped"):   #add values t
     cursor=connection.cursor()
     
     cursor.execute("use projects")
-    cursor.execute("select max(serial) from waste_data_test")
+    cursor.execute("select max(serial) from waste_data_test")#to start from correct serial each time called
     k=cursor.fetchall()
     
     for i in k :
@@ -128,19 +128,17 @@ def insertRow(filepath,category="skipped",confidence="skipped"):   #add values t
     k=cursor.fetchall()
     try:
         
-        #if filepath not in i[0]:
         query=("Insert into waste_data_test values (%s,%s,%s,%s)")
         datas=(serial,filepath,category,confidence)
         cursor.execute(query,datas)
         connection.commit()
-        #else :
     except Exception as e:
         print(e)
-        print(f"File path {filepath} already there !!! ")
+        print(f"File path {filepath} already there !!! ") #filepath as primary key
         return ("duplicate")
     
     
-def writeLogBinServer(log): # log for the smart bin
+def writeLogBinServer(log): # log for the smart bin server
     
     cursor=connection.cursor()
     try:

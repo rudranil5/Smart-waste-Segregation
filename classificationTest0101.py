@@ -13,6 +13,10 @@ import pandas as pd
 import add_rows_mysql as record
 #import server2208 as server2
 
+'''
+The classification test
+
+'''
 #print(numpy.__file__)
 
 # Class mapping used during training
@@ -26,8 +30,8 @@ CLASS_MAPPING = {
 }
 
 # Specify paths here
-MODEL_PATH = r'E:\DATASET_Trash_sbh_readwrite_ard\garbage-detector\models\final_model_new.keras'  # Path to your trained model
-IMAGE_PATH = r"C:\Desktop\sbV0101\received_image.jpg"  # Path to the image for prediction
+MODEL_PATH = 'final_model_new.keras'  # Path to your trained model
+IMAGE_PATH = "received_image.jpg"  # Path to the image for prediction
 DATA_DIR = r'E:\DATASET_Trash_sbh\garbage-detector\data\dataset'  # Path to the dataset for evaluation
 BATCH_SIZE = 16
 IMAGE_SIZE = 224  # Updated image size to match the model input

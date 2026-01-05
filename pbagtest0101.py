@@ -1,3 +1,10 @@
+'''
+This module  has two  functions, to load the model to and test the object whether its bag or not
+the testbag() tests the object and predict its class, if found bag, it determines if its recyclable or not from its other values of sensor recieved
+if not bag, it return the value to  controll.
+
+'''
+
 import random
 import classificationTest0101
 import tensorflow as tf
@@ -7,11 +14,11 @@ from tensorflow.keras.preprocessing import image
 
 def loadModel():
     # Load the trained model
-    bagmodelpath = tf.keras.models.load_model(r"F:\PYTHON\pbagdetector171.keras")
+    bagmodelpath = tf.keras.models.load_model("pbagdetector171.keras")
 
     return bagmodelpath
 
-def testbag(img_path,bagmodelpath=tf.keras.models.load_model(r"F:\PYTHON\pbagdetector171.keras"),moisture=500):
+def testbag(img_path,bagmodelpath=tf.keras.models.load_model("pbagdetector171.keras"),moisture=500):
 
     # Preprocess the image
     if not os.path.isfile(img_path):
@@ -34,20 +41,20 @@ def testbag(img_path,bagmodelpath=tf.keras.models.load_model(r"F:\PYTHON\pbagdet
         details.append(moisture) #3rd element
         threshold=600
         if moisture > threshold:
-            #arduino.write(b'DRY\n')
+            
             detection=f"Non-Recyclable  moisture - {moisture}"
             print(detection)
-            details.append("Non-Recyclable")
+            details.append("Non-Recyclable") #4th element
             return details
         else:
-            #arduino.write(b'OK\n')
+            
             detection=f"Recyclable moisture- {moisture}"
             print(detection)
             details.append("Recyclable")
-            return details
+            return details#the list
     else :
         details.append(0)
-        return details
+        return details #contains 2 elements only
 
 if __name__=="__main__":
     # Image path to test

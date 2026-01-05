@@ -1,3 +1,21 @@
+'''
+The module for the smart waste segregation system for the server side.
+theControl() is the hub and the main function to handle all other modules and functions.
+loadDependencies() loads the databases and models required repeated access all at once
+Communication class contains all socket related functions.
+writeLog() helps  to maintain the log for errors to be noted
+fatalError() is still in development and used to log and close the code in case it is no longer usable
+
+The execution starts from theControll with loading dependencies and establishing socket. currently the dependenceis are global, but could be made
+local if required
+
+theControll() creates a directory named Images to store all recieved images in it. then calculates the next photo serial, then it talks to the client
+and sends descicion
+it first sends the image for detection of multiobject, and then checks for bag and then its class
+
+In case of exception it can log error.
+'''
+
 import classificationTest0101
 import pbagtest0101 as pbagtest
 import contourDetect0101 as contour
@@ -8,21 +26,6 @@ import struct
 bagmodel=None
 classificationmodel=None
 databaseServer=None
-
-def server():
-    # Set up the server socket
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', 12345))
-    server_socket.listen(1)
-    print("Server listening...")
-
-    # Accept a connection
-    conn, addr = server_socket.accept()
-    print(f"Connected by {addr}")
-    
-    #communication(conn,dependencies)
-    print("closing connection")
-    conn.close()
 
 def loadDependencies():
     try:
@@ -37,6 +40,7 @@ def loadDependencies():
     except Exception as e:
             writeLog(e)
             fatalError(e)
+            
 def theControl():
 
     dependencies=loadDependencies() #load models and databases once
@@ -99,7 +103,7 @@ def theControl():
 
 
 class Communication:
-    def connectServer(self,host="0.0.0.0",port=12345):
+    def connectServer(self,host="0.0.0.0",port=12345):  #establish connection
         # Set up the server socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((host,port))
@@ -111,12 +115,12 @@ class Communication:
         print(f"Connected by {self.addr}")
         writeLog(f"Connected by {self.addr}")
 
-    def closeServer(self):
+    def closeServer(self):  #close connection
         print(f"\nClosing connection with {self.addr}")
         writeLog(f"Connection closed with {self.addr}")
         self.conn.close()
 
-    def recieveSize(self):
+    def recieveSize(self):  #recieve the size and unpack as 8 bytes
         try:
             size=b""
             while len(size)<8:
@@ -129,7 +133,7 @@ class Communication:
             log= ("Connection Broken ",e)
             writeLog(log)
       
-    def recieveImg(self,size,file_path):
+    def recieveImg(self,size,file_path):    #resieve the image as size recieved
         try:
             img=b""
             while len(img)<size:
@@ -145,7 +149,7 @@ class Communication:
             writeLog(log) 
             return None
 
-    def recieve(self,size):    #recieves messege type or length or the details of object
+    def recieve(self,size):    #recieves messege details of object as string
         try:
             messege=b""
             while len(messege)<size:
@@ -159,45 +163,20 @@ class Communication:
             log= ("Connection Broken ",e)
             writeLog(log) 
 
-    def send(self,messege):
+    def send(self,messege):     #sends the descision as 1 for recyclable, and 2 for non-recyclable
         try:
             self.conn.sendall(struct.pack("!Q",messege))
         except Exception as e:
             log= ("Connection Broken ",e)
             writeLog(log)
-    def communication1(self,conn): #not needed , to be removed
-        
-        try:
-            
-            file_path = "received_image.jpg"
-            # Receive and save the image
-            with open(file_path, "wb") as f:
-                try:
-                    while data:
-                        data = conn.recv(1024)
-                        if not data:
-                            break
-                            
-                        f.write(data)
-                except Exception as e:
-                    print("The exception --- ",e)
-                print(f"Image received and saved to {file_path}")
-            
-            # Send a confirmation message
-            msg = "Got it"
-            conn.send(msg.encode())
-        except Exception as e:
-            # Close the connection
-            print("Connection is closed due to  ",e)
-            conn.close()
-        
+    
 
                 
-def writeLog(e):
+def writeLog(e):    #log to db
     Log=str(e)
     record.writeLogBinServer(Log)
 
-def fatalError(e):
+def fatalError(e):  #close all if dependencies not loaded
     print("\nAn error occured-----  \n_____\t_____\n\n",e,"\n\n_____\t_____\n")
     writeLog(e)
     record.closeDb()

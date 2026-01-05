@@ -1,8 +1,23 @@
 # client.py
-'''The init will call the img capture module by default, and reffered to the client
+'''This code is prepared for the smart waste segregation system, in case the dustbin to be operated remotely.
+It establishes a connection over  the server IP [server code named server0101.py] , and initiates the camera. then it proceeds for the image and data sending to
+server and recieving the descicion to put in correct chamber to send to arduino.
 
-or else init can also call client , and client can refer to imgcapture first then
-execute itself, that would require certain change
+it saves a log of all errors (sensor data to be included) in a database.(locally or remotely).
+
+starting with thecontrol() function acting as the main, it has a  class for all functions related to server, and another class related to camera, to ensure secure data availability
+across related functions .
+user can start  this module after the server is started.
+
+upon disconnection from server midway, the controll module signals arduino to send objects blindly to non recyclable chamber as the Descicive modules are unreachable
+and continuously retries to reconnect to server
+
+the loop runs with no conditions for now, except for keyboardinterrupt.
+planning ongoing to implement GUI.
+
+
+0 is the faliure code and 1 the success code
+
 '''
 import socket
 import cv2
@@ -10,15 +25,14 @@ import os
 import struct
 import add_rows_mysql as record
 
-def writeLog(e):
-    #print("Error occured - ",e)
+def writeLog(e):    
     Log=str(e)
-    record.writeLogBinClient(Log)
+    record.writeLogBinClient(Log)   #writes log to an mysql server
     
 
-class ClientConnection:
+class ClientConnection: #class containing all socket related modules
     
-    def connection(self,host="127.0.0.1",port=12345):
+    def connection(self,host="127.0.0.1",port=12345):   #establish a connection and store it
         print("seeking Server... ")
         client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         client.connect((host,port))
@@ -26,26 +40,28 @@ class ClientConnection:
         self.client=client
         return self.client
     
-    def closeConnection(self):
+    def closeConnection(self):      #closes the connection
+        print("Disconnected")
+        writeLog("Disconnected from server")
         self.client.close()
         
-    def sendImg(self,imgPath):
+    def sendImg(self,imgPath):  #send image of size specified
         try:
             with open(imgPath,"rb") as f:
-                data=f.read(1024)
+                data=f.read(1024)   #the first chunk
                 while data:
                     self.client.send(data)
                     data=f.read(1024)
             print("image sent-")
         except Exception as e:
             writeLog(e)
-            return 0
+            return 0    
         return 1
-    def sendSize(self,size):
+    def sendSize(self,size):    #used to send the size to server, required to send items correctly without breaking others
         try:
-            self.client.sendall(struct.pack("!Q",size))
+            self.client.sendall(struct.pack("!Q",size)) #size is packed as 8 bytes always and unpacked as the same too
             print("size sent")
-        except ConnectionAbortedError :
+        except ConnectionAbortedError :     #this function alone decides whethe to establish reconnecton
             writeLog("Connection Aborted")
             return 0
         except Exception as e:
@@ -53,14 +69,14 @@ class ClientConnection:
             return 0
         
         return 1
-    def sendData(self,data):
+    def sendData(self,data):    #send sensor values
         try:
             self.client.sendall(data)
         except Exception as e:
             writeLog(e)
             return 0
         return 1
-    def recieve(self):
+    def recieve(self):  #recieve descicion fixed size only 1/2
         feedback=None
         try:
             data=b""
@@ -74,7 +90,7 @@ class ClientConnection:
             writeLog(e)
         return feedback
 
-def clientSide(full_path,client_socket):
+def clientSide(full_path,client_socket): #not used
     import struct
     import os
     file_size = os.path.getsize(full_path)
@@ -114,10 +130,11 @@ class Camera:
 
         print("Object detected\t\tCapturing Image...")
         # --- Save path ---
-        Dir = r"C:\Desktop"
+        
+        Dir = "Object_at_bin"
+        os.makedirs(Dir, exist_ok=True)#improvements needed for multi os or better usage
         filename = "captured_image.jpg"
         full_path = os.path.join(Dir, filename)
-        os.makedirs(Dir, exist_ok=True)
         ret, frame = self.cam.read()
         if ret:
             resized_frame = cv2.resize(frame, (512, 512))
@@ -128,11 +145,13 @@ class Camera:
         cv2.destroyAllWindows()
         return full_path
     
-def theControl():
+def theControl():   #the hub
+    
     Connection=ClientConnection()
     Connection.connection()
     camera=Camera()
-    while Connection:
+
+    while camera:
         path=camera.imgCapture()
         status=Connection.sendSize(os.path.getsize(path))
         Connection.sendImg(path)
@@ -157,17 +176,19 @@ def theControl():
                 theControl()
             except Exception as e:
                 print(e)
+                writeLog(e)
                 continue
             
         key = cv2.waitKey(1)
         if key % 256 == 27:  # ESC key
             print("Escape hit, closing...")
             Connection.closeConnection()
-    Connection.closeConnection()
-    print("Disconnected")
 
+    Connection.closeConnection()
+
+   
     
 if __name__=="__main__":
-    record.connectDb()
+    record.connectDb()  # establish the db connection seperately
     theControl()
     
