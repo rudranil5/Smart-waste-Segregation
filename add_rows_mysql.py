@@ -24,29 +24,29 @@ def initializeBinServer():  #creates the required databases and tables for logs
         a=cursor.fetchall()
         mkproject,mkthelog=0,0
         for i in a:
-            if 'projects2' == i[0]: #cursor.fetchall() return a list of tuples.
+            if 'projects' == i[0]: #cursor.fetchall() return a list of tuples.
                 mkproject=1
                 break
         for i in a:
-            if 'thelogs2' == i[0]:
+            if 'thelogs' == i[0]:
                 mkthelog=1
                 break
                 
         if not mkproject:
-            cursor.execute("create database projects2")
-            cursor.execute("use projects2")
+            cursor.execute("create database projects")
+            cursor.execute("use projects")
             cursor.execute("create table waste_data_test (serial int,filepath varchar(100),category varchar(50),confidence varchar(20))")
         if not mkthelog:    #server,client both databases will be created in same place
-            cursor.execute("create database thelogs2")
-            cursor.execute("use thelogs2")
+            cursor.execute("create database thelogs")
+            cursor.execute("use thelogs")
             cursor.execute("create table waste_bin_server (serial int,time Timestamp default current_timestamp,log varchar(500))")
             cursor.execute("create table waste_bin_client (serial int,time Timestamp default current_timestamp,log varchar(500))")
     else:
         print("Connection Error !! retry with correct details: ")
     
-def connectDb(): #establish connection to mysql database server
+def connectDb(host='localhost',user='user1',passwd='user1'): #establish connection to mysql database server
     global connection
-    connection=sql.connect(host='localhost',user='root',password='root',ssl_disabled=False)
+    connection=sql.connect(host=host,user=user,password=passwd,ssl_disabled=False)
     if connection.is_connected():          #to check if connection is done
         #print(connection)      
         print("connected to database on localhost  ")
@@ -121,8 +121,11 @@ def insertRow(filepath,category="skipped",confidence="skipped"):   #add values t
     k=cursor.fetchall()
     
     for i in k :
-        serial=int(i[0]+1)
-        #print(serial)
+        if not i[0] is None:
+            serial=int(i[0]+1)
+            #print(serial)
+        else:
+            serial=1
 
     cursor.execute("select filepath from waste_data_test")
     k=cursor.fetchall()
@@ -147,8 +150,11 @@ def writeLogBinServer(log): # log for the smart bin server
         k=cursor.fetchall()
         
         for i in k :
+        if not i[0] is None:
             serial=int(i[0]+1)
             #print(serial)
+        else:
+            serial=1
       
         query=("Insert into waste_bin_server (serial,log)values (%s,%s)")
         datas=(serial,log)
@@ -206,3 +212,4 @@ if __name__=="__main__":
     #insertRow("testpath2","n","n")
     closeDb()
     
+
