@@ -5,12 +5,13 @@
   <H1>A System to recognize and separate waste types</H1>
   <br>
   users... never worry anymore, just throw the waste in the bin, rest on Us . WE are here to squeeze our minds.
-  <I> <H3>THIS PROJECT WAS PRESENTED AT SMART BENGAL HACKATHON 2025 , CONSISTING OF TRAINED MACHINE LEARNING  MODELS FOR OBJECT TYPE DETECTION,  AND VARIOUS SENSORS TO DETECT OBJECT AND FURTHER CLASSIFY THEM, ALSO CHECK THE BIN'S STATUS TIME TO TIME. OUR GROUP IS STILL WORKING ON FIXING ITS BUGS & IMPROVING IT. I GAINED VALUABLE EXPERIENCES AND INSIGHTS  LEADING MY OUR TEAM AND WORKING  ON THIS PROJECT. THIS NEEDED A LOT OF PRIOR RESEARCH, AND IDEA GENERATION KEEPING IN MIND REAL WORLD APPLICATION.</H3></I>
+  The main code is based on python and the descicive models are trained with Machine Learning. to recognise and identify image types. our train data contains self collected and kpriorly available images both. To contribute or test to this project All prior pyhton module requirements are added in the piprequirements.txt  python and mysql are needed in the server side . The client side code for application requires raspberry pi and arduino with all sensors required. but for testing just python with opencv is enough.
+  <I> <H3>THIS PROJECT WAS PRESENTED AT SMART BENGAL HACKATHON 2025 , CONSISTING OF TRAINED MACHINE LEARNING  MODELS FOR OBJECT TYPE DETECTION,  AND VARIOUS SENSORS TO DETECT OBJECT AND FURTHER CLASSIFY THEM, ALSO CHECK THE BIN'S STATUS TIME TO TIME. OUR GROUP IS STILL WORKING ON FIXING ITS BUGS & IMPROVING IT. I GAINED VALUABLE EXPERIENCES AND INSIGHTS  LEADING  OUR TEAM AND WORKING  ON THIS PROJECT. THIS NEEDED A LOT OF PRIOR RESEARCH, AND IDEA GENERATION KEEPING IN MIND REAL WORLD APPLICATION.</H3></I>
   <br>
-  Developed in cooperation with :- <br> <a href=https://github.com/Exploretech-ankita> Ankita Pramanik</a>  ,<br> Aniket Maity ,<br> <!a href ="https://Sagar-AI2.github.io/myself/index.html">Debajyoti Roy</a> ,<br> <a           href=https://github.com/psroy007>Purab Singha Roy </a> , 
+  Developed in cooperation with :- <br> <a href=https://github.com/Exploretech-ankita> Ankita Pramanik</a>  ,<br> Aniket Maity ,<br> <!a href ="https://Sagar-AI2.github.io/myself/index.html">Debajyoti Roy</a> ,<br> Special Thanks -- Purab Singha Roy  , 
   <br>
   MENTORS :<br>
-  Dr. Tanushree Chatarjee & <BR>Dr Sanjib Roy
+  Dr. Tanushree Chatarjee & <BR>Dr Sanjib Roy & 
 <br> Prof. Arnab Chakraborty.
   <hr>
 
